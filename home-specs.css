@@ -1,0 +1,27 @@
+/* V14 trial: one-shot telemetry sequence, restricted to the home specifications. */
+.home-telemetry{isolation:isolate}
+.home-telemetry .telemetry-controls{border-top:1px solid var(--line);padding:8px 18px;display:flex;justify-content:flex-end}
+.telemetry-replay{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;font-size:12px;color:#bebec8;padding:8px 5px}
+.telemetry-replay>span{color:var(--red);font-size:20px}.telemetry-replay:hover{color:white}
+.home-telemetry .telemetry-controls{display:none}
+.home-telemetry.telemetry-ready .telemetry-controls{display:flex}
+.home-telemetry .spec-table td>strong{display:inline-block;min-width:3ch;font-variant-numeric:tabular-nums}
+.home-telemetry .spec-meter{height:3px}
+.home-telemetry .spec-meter::after{height:3px}
+.home-telemetry.telemetry-ready .spec-meter::after{transform:scaleX(0);transition:none!important}
+.home-telemetry .spec-row.telemetry-complete .spec-meter::after{transform:scaleX(1)}
+.home-telemetry.telemetry-activated::before{width:60px;animation:telemetry-boot 1100ms cubic-bezier(.2,.7,.3,1) both!important}
+.home-telemetry .spec-row.telemetry-playing{animation:telemetry-row 1600ms ease-out var(--telemetry-delay,0ms) both!important}
+.home-telemetry .spec-row.telemetry-playing:not(.telemetry-pending) .spec-meter::after{animation:telemetry-fill 1450ms cubic-bezier(.16,.8,.25,1) var(--telemetry-delay,0ms) both!important}
+.home-telemetry .spec-row.telemetry-playing:not(.telemetry-pending) .spec-meter::before{content:'';position:absolute;inset:0 auto 0 -24%;width:24%;z-index:1;background:linear-gradient(90deg,transparent,#fff9,transparent);animation:telemetry-glint 1450ms ease-out var(--telemetry-delay,0ms) both!important;pointer-events:none}
+.home-telemetry .spec-row.telemetry-playing td>strong{animation:telemetry-number 1600ms ease-out var(--telemetry-delay,0ms) both!important}
+.home-telemetry .spec-row.telemetry-playing .spec-index{animation:telemetry-index 1600ms ease-out var(--telemetry-delay,0ms) both!important}
+.home-telemetry .spec-row.telemetry-playing .spec-pending{animation:telemetry-pending 1200ms ease-out var(--telemetry-delay,0ms) both!important}
+@keyframes telemetry-boot{0%{width:60px;opacity:.5}55%{width:100%;opacity:1}100%{width:60px;opacity:1}}
+@keyframes telemetry-row{0%{background:#ed24341f}100%{background:transparent}}
+@keyframes telemetry-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes telemetry-glint{0%,12%{opacity:0;left:-24%}35%{opacity:1}90%,100%{opacity:0;left:100%}}
+@keyframes telemetry-number{0%{transform:translateY(5px);color:#ed2434}55%{transform:translateY(0);color:#fff}100%{transform:none;color:inherit}}
+@keyframes telemetry-index{0%{color:white;text-shadow:0 0 10px #ed2434}100%{color:var(--red);text-shadow:none}}
+@keyframes telemetry-pending{from{opacity:.5}to{opacity:1}}
+@media(max-width:700px){.home-telemetry .telemetry-controls{padding-inline:16px}.telemetry-replay{font-size:13px}.home-telemetry .spec-table td>strong{min-width:3ch}}
