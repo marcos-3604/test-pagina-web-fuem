@@ -1,17 +1,5 @@
 (() => {
   document.querySelectorAll('.partner-marquee').forEach(marquee => {
-    const button = document.querySelector(`[aria-controls="${marquee.id}"]`);
-    if (!marquee || !button) return;
-    let paused = false;
-    function update() {
-      marquee.classList.toggle('is-paused', paused);
-      button.hidden = false;
-      button.setAttribute('aria-pressed', String(paused));
-      button.setAttribute('aria-label', paused ? 'Reanudar fila de partners' : 'Pausar fila de partners');
-      button.querySelector('.partner-pause-label').textContent = paused ? 'Reanudar' : 'Pausar';
-      button.firstElementChild.textContent = paused ? '▷' : 'Ⅱ';
-    }
-    button.addEventListener('click', () => { paused = !paused; update(); });
     marquee.addEventListener('focusout', () => requestAnimationFrame(() => {
       if (!marquee.contains(document.activeElement)) marquee.scrollLeft = 0;
     }));
@@ -21,6 +9,5 @@
       });
       observer.observe(marquee);
     }
-    update();
   });
 })();
