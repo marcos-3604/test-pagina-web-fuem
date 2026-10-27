@@ -63,20 +63,6 @@
       if (!introVisible()) watchRows();
     }).observe(intro, { attributes: true, attributeFilter: ['class'] });
   }
-  panel.querySelector('[data-replay-telemetry]')?.addEventListener('click', () => {
-    frames.forEach(id => cancelAnimationFrame(id));
-    frames.clear();
-    rows.forEach(row => {
-      row.classList.remove('telemetry-playing', 'telemetry-complete');
-      const number = row.querySelector('[data-count]');
-      if (number) number.textContent = format(number).format(Number(number.dataset.count));
-    });
-    panel.classList.remove('telemetry-activated');
-    void panel.offsetWidth;
-    watchRows();
-    const bounds = panel.getBoundingClientRect();
-    if (bounds.top < 0 || bounds.top > innerHeight * 0.5) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) [...frames.keys()].forEach(finish);
   });

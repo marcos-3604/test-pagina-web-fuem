@@ -26,33 +26,10 @@ let hasSeenIntro = false;
 try { hasSeenIntro = sessionStorage.getItem("fuem-intro-v4") === "seen"; sessionStorage.setItem("fuem-intro-v4","seen"); } catch {}
 const mobileHomeIntro = document.body.dataset.page === "index" && matchMedia("(max-width: 960px)").matches;
 if (hasSeenIntro && !mobileHomeIntro) intro.classList.add("is-done"); else playIntro();
-$("#replay-intro")?.addEventListener("click",()=>{scrollTo({top:0,behavior:"instant"});playIntro(true);});
 
-const video = $("#hero-video"), videoToggle = $("#video-toggle");
-let manuallyPaused = reduceMotion.matches, heroOnscreen = true;
-if(video && videoToggle){
-  video.addEventListener("fuem:scenechange",()=>{manuallyPaused=false;});
-  const update=()=>{
-    videoToggle.setAttribute("aria-label",video.paused?"Resume background video":"Pause background video");
-    videoToggle.setAttribute("aria-pressed",String(video.paused));
-    $("#video-icon").textContent=video.paused?"▷":"Ⅱ";
-    $("#video-label").textContent=video.paused?"RESUME":"PAUSE";
-  };
-  video.addEventListener("play",update);video.addEventListener("pause",update);
-  videoToggle.addEventListener("click",()=>{manuallyPaused=!video.paused;if(video.paused)video.play().catch(update);else video.pause();});
-  if(reduceMotion.matches){video.removeAttribute("autoplay");video.pause();}else video.play().catch(update);
-  update();
-  document.addEventListener("visibilitychange",()=>{if(document.hidden)video.pause();else if(heroOnscreen&&!manuallyPaused&&!reduceMotion.matches)video.play().catch(update);});
-  if ("IntersectionObserver" in window) {
-    const heroVisibility = new IntersectionObserver(entries=>{
-      heroOnscreen=entries[0].isIntersecting;
-      if(!heroOnscreen)video.pause();
-      else if(!document.hidden&&!manuallyPaused&&!reduceMotion.matches)video.play().catch(update);
-    },{threshold:0});
-    heroVisibility.observe(video.closest(".home-hero"));
-  }
-}
-reduceMotion.addEventListener("change",()=>{if(reduceMotion.matches){manuallyPaused=true;video?.pause();intro.classList.add("is-done");$$(".reveal").forEach(e=>e.classList.add("visible"));}});
+reduceMotion.addEventListener('change',()=>{
+  if(reduceMotion.matches){intro.classList.add('is-done');$$('.reveal').forEach(e=>e.classList.add('visible'));}
+});
 
 const dropdown=$(".nav-dropdown"),dropdownToggle=$(".dropdown-toggle"),mega=$("#club-menu");
 function setDropdown(open){dropdown?.classList.toggle("open",open);dropdownToggle?.setAttribute("aria-expanded",String(open));if(mega)mega.inert=!open;}
