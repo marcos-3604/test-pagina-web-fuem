@@ -36,7 +36,10 @@ function setDropdown(open){dropdown?.classList.toggle('open',open);dropdownToggl
 dropdownToggle?.addEventListener('mouseenter',()=>setDropdown(true));
 dropdownToggle?.addEventListener('click',()=>setDropdown(true));
 dropdownToggle?.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();setDropdown(true);$('a',mega)?.focus();}});
-dropdown?.addEventListener('focusout',()=>queueMicrotask(()=>{if(!dropdown.contains(document.activeElement))setDropdown(false);}));
+dropdown?.addEventListener('focusout',event=>{
+  if(event.relatedTarget && dropdown.contains(event.relatedTarget))return;
+  setDropdown(false);
+});
 $('#header')?.addEventListener('mouseleave',()=>setDropdown(false));
 $$('.desktop-nav > a,.header-actions > a,.brand').forEach(a=>a.addEventListener('mouseenter',()=>setDropdown(false)));
 document.addEventListener('click',e=>{if(!dropdown?.contains(e.target))setDropdown(false);});
