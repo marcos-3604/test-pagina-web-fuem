@@ -1,0 +1,59 @@
+name: Update Instagram photographs
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: instagram-feed
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Read authorized photographs
+        id: sync
+        env:
+          FUEM_INSTAGRAM_ACCESS_TOKEN: ${{ secrets.FUEM_INSTAGRAM_ACCESS_TOKEN }}
+          FUEM_INSTAGRAM_USER_ID: ${{ secrets.FUEM_INSTAGRAM_USER_ID }}
+          FUEM_INSTAGRAM_USERNAME: fuem83
+          FUEM_INSTAGRAM_HASHTAG: ${{ vars.FUEM_INSTAGRAM_HASHTAG }}
+        shell: bash
+        run: |
+          if [ -z "$FUEM_INSTAGRAM_ACCESS_TOKEN" ] || [ -z "$FUEM_INSTAGRAM_USER_ID" ]; then
+            echo "Instagram pending account authorization; preserving existing content."
+            exit 0
+          fi
+          python .github/scripts/instagram_feed.py --output . --hashtag "$FUEM_INSTAGRAM_HASHTAG"
+          git add -- instagram-feed.json instagram-media/
+          if git diff --cached --quiet; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Update authorized Instagram photographs'
+          git push
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Publish updated photographs
+        if: steps.sync.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          # Also retry a previous push whose deployment dispatch failed.
+          SHA=$(git rev-parse HEAD)
+          DEPLOYED=$(gh run list --workflow pages.yml --branch main --status success --limit 10 --json headSha --jq '.[].headSha')
+          if printf '%s\n' "$DEPLOYED" | grep -Fxq "$SHA"; then exit 0; fi
+          for attempt in 1 2 3; do
+            if gh workflow run pages.yml --ref main; then exit 0; fi
+            sleep 5
+          done
+          exit 1
