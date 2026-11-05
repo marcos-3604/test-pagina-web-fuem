@@ -1,0 +1,38 @@
+# Equipo de agentes de este proyecto. aiforge los coordina solo: tú solo escribes peticiones y respondes dudas.
+# Quién hace cada rol (IA, modelo, esfuerzo) lo decide el router según el tipo de trabajo, el cupo y lo que
+# ha aprendido; `aiforge team` lo muestra. Puedes añadir `instructions = "..."` a un rol para este proyecto.
+
+[roles.arquitecto]
+kind = "architecture"
+does = "Diseña módulos, contratos entre ellos y estructura a partir del SPEC (ARCHITECTURE.md). No programa."
+instructions = ""
+
+[roles.orquestador]
+kind = "plan"
+does = "Divide el trabajo en tareas pequeñas y paralelizables, con alcance y criterios; vigila el objetivo."
+instructions = ""
+
+[roles.programador]
+kind = "code"
+does = "Implementa una tarea con contexto mínimo y solo dentro de su alcance. Varios trabajan a la vez."
+instructions = ""
+
+[roles.tester]
+kind = "test"
+does = "Escribe y amplía tests cuando el plan lo pide; los checks los ejecuta aiforge (0 tokens)."
+instructions = ""
+
+[roles.revisor]
+kind = "review"
+does = "Revisa cada cambio contra la tarea y el objetivo; siempre una IA distinta del programador."
+instructions = ""
+
+[roles.auditor]
+kind = "audit"
+does = "Al final comprueba que el SPEC está cubierto y crea las tareas que falten."
+instructions = ""
+
+[roles.resolutor]
+kind = "code"
+does = "Resuelve conflictos al integrar trabajo hecho en paralelo, conservando ambos cambios."
+instructions = ""

@@ -1,0 +1,2 @@
+# aiforge: los hooks generados no son código del proyecto; ruff los ignora.
+exclude = ["*"]

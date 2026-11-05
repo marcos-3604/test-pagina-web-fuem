@@ -1,0 +1,12 @@
+{
+  "block_regex": [
+    "\\bgit\\s+push\\b.*(--force|-f\\b|--force-with-lease)",
+    "\\brm\\s+-[a-zA-Z]*r[a-zA-Z]*f?\\s+(/|~|\\$HOME|\\.\\.)",
+    "\\b(curl|wget)\\b[^|]*\\|\\s*(sudo\\s+)?(ba|z)?sh\\b",
+    "\\bchmod\\s+(-R\\s+)?777\\b",
+    "\\bmkfs\\.|\\bdd\\s+if=.*\\bof=/dev/",
+    ":\\(\\)\\s*\\{\\s*:\\|:&\\s*\\};:",
+    "\\b(cat|less|more|head|tail)\\s+[^|;]*\\.env\\b"
+  ],
+  "block_reason": "Bloqueado por aiforge (lista blanca del proyecto). Si es necesario, pídeselo al usuario."
+}

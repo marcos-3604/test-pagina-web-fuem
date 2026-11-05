@@ -1,0 +1,26 @@
+name = "test-pagina-web-fuem"
+stack = "generic"
+bootstrap = ""
+tags = []
+spec = "SPEC.md"
+max_audit_rounds = 1
+# Tareas a la vez (cada una en su worktree); 1 = una tras otra.
+max_parallel = 2
+# Arquitecto antes de planificar: auto (SPEC grande) | always | off
+architect = "off"
+worktree_symlinks = []
+install_if_missing = ""
+
+[checks]
+install = ""
+test = "python3 tools/check_site.py"
+test_one = ""
+lint = ""
+typecheck = ""
+format = ""
+run_per_task = ["test", "lint", "typecheck"]
+stop_hook = []
+
+[permissions]
+# Comandos extra que los agentes pueden ejecutar sin preguntar en este proyecto.
+extra_allow = ["python3 tools/*"]
