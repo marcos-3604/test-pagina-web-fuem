@@ -1,0 +1,42 @@
+[
+  {
+    "task": "T-001",
+    "topic": "verification of t-001 against the expected exit code",
+    "question": "The task requires `python3 tools/check_site.py` to exit ≠ 0 on today's repo, but the verification step treats that exit code as a failure. How should T-001's verification handle this?",
+    "options": [
+      "A) Accept exit 1 for T-001 as the expected result: confirm the output lists exactly the 6 SVGs and the 2 monoplaza pages, and only require the unit tests to pass. Later tasks (SVG optimisation) will bring the check to 0.",
+      "B) Add a baseline/allowlist file of known failures so the check exits 0 now and fails only on new problems. This changes the agreed design and the acceptance criteria.",
+      "C) Add a flag such as `--warn-only` that always exits 0, and use it only in T-001's verification."
+    ],
+    "recommended": "A",
+    "answered": true,
+    "answer": "Correcto: tools/check_site.py debe seguir fallando hoy (detecta los SVG pesados reales); no lo debilites. Ya he cambiado la verificación: el check del proyecto pasa a ser 'python3 -m unittest discover -s tools -p test_*.py' (los tests del propio comprobador, con fixtures pequeños que cubran cada regla), y check_site.py en el repo real será el check de T-002 y T-004, cuando las imágenes ya estén optimizadas. Termina T-001 así."
+  },
+  {
+    "task": "T-002",
+    "topic": "umbral de error máximo para la foto del coche (assets/v3)",
+    "question": "Con el máximo estricto de 32/255 la foto del coche tiene que ir sin pérdida (919 KB) y monoplaza.html se queda en 7,39 MB, por encima de los 6 MB. ¿Mantengo la regla e informo del exceso, o permito unos pocos picos aislados para poder usar WebP con pérdida (215 KB, error medio 0,76/255)?",
+    "options": [
+      "A) Mantener la regla actual: imagen idéntica a la original, sin pérdida; monoplaza se queda en 7,39 MB, lo anoto en el informe y check_site.py sigue fallando",
+      "B) Cambiar el máximo a «como mucho un 0,1 % de valores por encima de 32/255», manteniendo el error medio ≤ 2/255: la foto pasa a calidad 90 (unos 750 KB por SVG) y monoplaza baja a unos 4,6 MB, así que check_site.py pasaría. Para aplicarlo restauro los 6 SVG de assets/v3 desde git y vuelvo a ejecutar el script",
+      "C) Subir el error máximo a 96/255: también deja pasar la calidad 90, pero es un límite de máximo muy flojo para el resto de imágenes"
+    ],
+    "recommended": "B",
+    "answered": true,
+    "answer": "B) Como mucho un 0,1 % de valores por encima de 32/255 y error medio ≤ 2/255; elige la calidad más baja que cumpla ambas. Anótalo en el informe."
+  },
+  {
+    "task": "T-004",
+    "kind": "review_dispute",
+    "topic": "revisión",
+    "question": "El revisor rechaza T-004 otra vez por lo mismo, con las comprobaciones en verde. ¿Aceptar el cambio tal cual o rehacerlo?\nRevisión independiente:\n- docs/RENDIMIENTO.md: Falta la columna \"Antes\" en la tabla por página. La tarea pide la salida de check_site.py ahora y sobre el árbol original, y el documento solo da 'Después' y deja 'Pendiente: medir el peso antes por página'. Solo se citan los 11,53 MB de monoplaza, tomados de docs/svg-optimizacion.txt. Eso incumple el criterio 'tabla por página' y el de que las cifras coincidan con la salida real del comprobador. → Crear un `git worktree` del commit 2c877e1 en el scratchpad, sin tocar el repo, y ejecutar `python3 tools/check_site.py` (o `--json`) contra él. Si el comprobador de ese árbol no existe, ejecutar el del árbol actual con la raíz apuntando al worktree, si la herramienta lo permite. Añadir a la tabla las columnas Antes (imágenes y MB) y Después. Eliminar el apartado 'Pendiente' del peso por página. Si de verdad no se puede ejecutar, hay que escalarlo en lugar de entregar la tarea como completa.\n- docs/RENDIMIENTO.md: Las cifras por fichero se copiaron de docs/svg-optimizacion.txt sin contrastarlas con los tamaños reales. La tarea pedía contrastarlas con `git show <base>:ruta | wc -c` y el implementador admite que no lo hizo. Además, la nota de 'ahorro' de los ficheros v3 (84,5 %) y el total (13 364,6 KB → 2 831,8 KB) no están verificados. → Verificar con `git show 2c877e1:<ruta> | wc -c` y `wc -c` actual, al menos para los ficheros de assets/v3 y una muestra de assets/partners. Corregir lo que difiera.",
+    "options": [
+      "Aceptar el cambio tal cual",
+      "Rehacer siguiendo la revisión"
+    ],
+    "recommended": "",
+    "route": "claude · haiku · nivel light, esfuerzo low",
+    "answered": true,
+    "answer": "Rehacer, pero sin crear worktrees (no tienes permiso): aiforge ya midió el 'antes' ejecutando el check_site.py actual sobre el árbol del commit 2c877e1. Usa estas cifras reales (MB de imágenes por página, antes → después; el nº de imágenes no cambia):\n- 404.html 0.00 MB →  404.html 0.00 MB (0 imágenes)\n- actualidad.html 3.61 MB →  actualidad.html 2.48 MB\n- contacto.html 2.48 MB →  contacto.html 1.36 MB\n- en/actualidad.html 3.61 MB →  en/actualidad.html 2.48 MB\n- en/contacto.html 2.48 MB →  en/contacto.html 1.36 MB\n- en/equipo.html 3.16 MB →  en/equipo.html 2.04 MB\n- en/eventos.html 3.19 MB →  en/eventos.html 2.07 MB\n- en/formula-student.html 2.84 MB →  en/formula-student.html 1.71 MB\n- en/fuentes.html 2.48 MB →  en/fuentes.html 1.36 MB\n- en/galeria.html 5.18 MB →  en/galeria.html 4.06 MB\n- en/historia.html 2.83 MB →  en/historia.html 1.70 MB\n- en/index.html 5.79 MB →  en/index.html 3.14 MB\n- en/monoplaza.html 11.53 MB →  en/monoplaza.html 2.77 MB\n- en/patrocinadores.html 2.48 MB →  en/patrocinadores.html 1.36 MB\n- en/unete.html 2.48 MB →  en/unete.html 1.36 MB\n- equipo.html 3.16 MB →  equipo.html 2.04 MB\n- eventos.html 3.19 MB →  eventos.html 2.07 MB\n- formula-student.html 2.84 MB →  formula-student.html 1.71 MB\n- fuentes.html 2.48 MB →  fuentes.html 1.36 MB\n- galeria.html 5.18 MB →  galeria.html 4.06 MB\n- historia.html 2.83 MB →  historia.html 1.70 MB\n- index.html 5.79 MB →  index.html 3.14 MB\n- monoplaza.html 11.53 MB →  monoplaza.html 2.77 MB\n- patrocinadores.html 2.48 MB →  patrocinadores.html 1.36 MB\n- →  unete.html 1.36 MB\n- unete.html 2.48 MB → 1.36 MB\nPor fichero (git show 2c877e1:ruta | wc -c frente a wc -c actual): assets/v3/car-cutout.svg 1895863 → 294348; assets/v3/part-body.svg 1896426 → 294911; assets/partners/avl.svg 319807 → 140412; assets/partners/danima-composites.svg 288357 → 72198. Contrasta el resto con git show <base>:ruta | wc -c y wc -c (están permitidos). Añade además la medición de Lighthouse 12 de partida en móvil: portada LCP 22,7 s y 7,4 MB transferidos; monoplaza LCP 50,8 s y 12,2 MB (la medición después la hará aiforge)."
+  }
+]

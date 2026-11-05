@@ -1,0 +1,140 @@
+{
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Comprobador tools/check_site.py con tests y comandos en AGENTS.md",
+      "kind": "code",
+      "difficulty": 3,
+      "description": "Crear tools/check_site.py (Python estándar; Pillow solo si hace falta), que será el check del proyecto. Recorre todos los .html (raíz y en/), .css y .js del sitio (excluyendo .github/, .claude/, .codex/, .gemini/, tools/, docs/) y:\n1) Extrae las referencias locales: atributos src, href, srcset (cada candidato), poster, url(...) en CSS y en atributos style, y cadenas con rutas 'assets/...' en JS. Ignora http(s):, //, data:, mailto:, tel:, #anclas y query/fragment. Resuelve rutas relativas al fichero que las contiene (las páginas de en/ usan ../). Falla si alguna no existe.\n2) Para cada .svg de assets/ busca imágenes incrustadas data:image/png;base64 y falla si alguna decodificada supera 400 KB.\n3) Para cada página .html suma el peso de las imágenes que referencia (directamente y a través de los CSS/JS que carga; contar cada fichero una vez por página; jpg/png/webp/svg/gif/avif, sin vídeos mp4/webm) y falla si supera 6 MB.\nImprime un resumen por página (peso total de imágenes) y la lista de ficheros problemáticos con el motivo. Código de salida 0 si todo está bien, ≠0 si hay fallos. Opción --json (o similar) es opcional.\nAñadir tests unittest en tools/test_check_site.py con fixtures en directorio temporal (referencia rota, SVG con PNG grande, página que excede 6 MB, caso correcto). La función principal debe aceptar la raíz del sitio como argumento para poder testearla.\nEs esperable que sobre el repo actual el comprobador FALLE (SVGs con PNG de 1,9 MB, monoplaza pesada): eso lo arreglan tareas posteriores; documentar la salida actual en el resumen de la tarea.\nActualizar la sección 'Comandos' de AGENTS.md con: `python3 tools/check_site.py` (check del sitio) y `python3 -m unittest discover -s tools` (tests).",
+      "acceptance": [
+        "python3 -m unittest discover -s tools pasa",
+        "python3 tools/check_site.py se ejecuta sobre el repo, imprime peso de imágenes por página y lista los SVG con PNG > 400 KB (assets/v3/car-cutout.svg, part-*.svg) con salida ≠ 0",
+        "Una referencia local inexistente en un HTML, CSS o JS (incluido 'assets/...' en JS) provoca fallo",
+        "Las rutas de en/*.html se resuelven correctamente relativas a en/",
+        "No se cuentan vídeos en el peso de imágenes",
+        "AGENTS.md documenta los comandos"
+      ],
+      "write_scope": [
+        "tools/check_site.py",
+        "tools/test_check_site.py",
+        "AGENTS.md"
+      ],
+      "read_first": [
+        "SPEC.md",
+        "AGENTS.md",
+        "index.html",
+        "monoplaza.html",
+        "en/index.html",
+        "components.js",
+        "partners.js",
+        "hero-media.js",
+        "styles.css",
+        "v3.css"
+      ],
+      "check": "python3 -m unittest discover -s tools",
+      "depends_on": [],
+      "tags": [
+        "tooling",
+        "check"
+      ]
+    },
+    {
+      "id": "T-002",
+      "title": "Script tools/optimize_svg_images.py y re-codificación WebP de SVGs",
+      "kind": "code",
+      "difficulty": 4,
+      "description": "Crear tools/optimize_svg_images.py (Python + Pillow) reutilizable: recibe ficheros/globs SVG, localiza cada data:image/png;base64 incrustado, decodifica el PNG, lo re-codifica como WebP con transparencia (con pérdida de alta calidad) y también lossless, y elige el más pequeño que cumpla la verificación visual: decodificar el WebP y comparar con el PNG original en RGBA; error medio por canal ≤ 2/255 y error máximo razonable (umbral documentado en el script, p. ej. ≤ 32/255; si no se cumple, subir calidad o pasar a lossless). Sustituir solo el contenido del data URI (data:image/webp;base64,...) conservando byte a byte el resto del SVG (viewBox, máscaras, transformaciones, títulos, atributos) y el nombre del fichero. No reescribir el fichero si el ahorro total es < 20 %. Debe imprimir por fichero tamaño antes/después y la decisión (y opción --dry-run). Avisar de que se pierden los metadatos C2PA del PNG.\nAplicarlo a assets/v3/car-cutout.svg, assets/v3/part-*.svg y assets/partners/*.svg. Guardar la salida del script (tabla antes/después) en docs/svg-optimizacion.txt para el informe.\nAñadir tests en tools/test_optimize_svg_images.py (SVG sintético con PNG RGBA: se conserva el resto del SVG, se respeta el umbral del 20 %, la verificación de error funciona).",
+      "acceptance": [
+        "python3 tools/check_site.py sale con 0 (ningún SVG con PNG > 400 KB y ninguna página > 6 MB de imágenes); si alguna página sigue excediendo 6 MB, informarlo en vez de tocar otros ficheros",
+        "Los SVG modificados solo difieren en el data URI de la imagen; nombres de fichero sin cambios",
+        "Cada imagen re-codificada cumple error medio por canal RGBA ≤ 2/255",
+        "Ningún fichero se reescribe si el ahorro es < 20 %",
+        "python3 -m unittest discover -s tools pasa",
+        "docs/svg-optimizacion.txt contiene tamaños antes/después por fichero y la nota sobre C2PA"
+      ],
+      "write_scope": [
+        "tools/optimize_svg_images.py",
+        "tools/test_optimize_svg_images.py",
+        "assets/v3/*.svg",
+        "assets/partners/*.svg",
+        "docs/svg-optimizacion.txt"
+      ],
+      "read_first": [
+        "SPEC.md",
+        "tools/check_site.py",
+        "assets/partners/avl.svg"
+      ],
+      "check": "python3 tools/check_site.py",
+      "depends_on": [
+        "T-001"
+      ],
+      "tags": [
+        "images",
+        "performance"
+      ]
+    },
+    {
+      "id": "T-003",
+      "title": "Corregir width/height de fuem-logo.png (es y en)",
+      "kind": "bugfix",
+      "difficulty": 2,
+      "description": "Obtener las dimensiones reales de assets/fuem-logo.png (Pillow o cabecera PNG). Buscar todas las apariciones de fuem-logo.png en las páginas .html de la raíz y de en/, y en los JS que inyectan cabecera/pie (components.js, en/components.js). Donde los atributos width/height no coincidan con la proporción real (aviso Lighthouse image-aspect-ratio), corregir height (manteniendo el width actual, para no alterar el tamaño visual, que lo fija el CSS) para que width/height respete la proporción, redondeando a entero. No cambiar nada más (los HTML están minificados en 1-2 líneas: editar solo esos atributos). Verificar que el CSS no depende del atributo height para el tamaño visible; si lo hiciera, informar en lugar de cambiar el aspecto.",
+      "acceptance": [
+        "Todas las etiquetas img de fuem-logo.png en *.html, en/*.html y components.js tienen width/height con la proporción real del PNG (diferencia de redondeo < 1 px)",
+        "El diff solo toca atributos width/height de esas etiquetas",
+        "python3 -m unittest discover -s tools pasa"
+      ],
+      "write_scope": [
+        "*.html",
+        "en/*.html",
+        "components.js",
+        "en/components.js"
+      ],
+      "read_first": [
+        "SPEC.md",
+        "components.js",
+        "index.html",
+        "mobile.css",
+        "styles.css"
+      ],
+      "check": "python3 -m unittest discover -s tools",
+      "depends_on": [
+        "T-001"
+      ],
+      "tags": [
+        "lighthouse",
+        "html"
+      ]
+    },
+    {
+      "id": "T-004",
+      "title": "Informe docs/RENDIMIENTO.md",
+      "kind": "docs",
+      "difficulty": 2,
+      "description": "Redactar docs/RENDIMIENTO.md en español: qué se cambió (comprobador, re-codificación de imágenes incrustadas en SVG, proporción del logo), peso antes/después por fichero (usar docs/svg-optimizacion.txt y/o `git show <commit-base>:ruta | wc -c`) y por página (salida de python3 tools/check_site.py ahora y sobre el árbol original, p. ej. ejecutando el comprobador contra un `git worktree` del commit base en el scratchpad, sin modificar el repo), medición de partida del SPEC (portada LCP 22,7 s y 7,4 MB; monoplaza LCP 50,8 s y 12,2 MB), nota de que se pierden los metadatos C2PA de los PNG incrustados, y recomendaciones NO aplicadas porque cambian el diseño o requieren decisión del dueño: contraste de botones, tamaños de letra pequeños, hreflang absoluto con el dominio definitivo, vídeos en móvil, CSS que bloquea el renderizado. No inventar mediciones Lighthouse nuevas que no se hayan hecho.",
+      "acceptance": [
+        "docs/RENDIMIENTO.md existe con secciones de cambios, tabla antes/después por fichero, tabla por página y recomendaciones no aplicadas (las cinco del SPEC)",
+        "Las cifras coinciden con la salida real del comprobador y los tamaños reales de los ficheros",
+        "Menciona la pérdida de metadatos C2PA",
+        "python3 tools/check_site.py sale con 0"
+      ],
+      "write_scope": [
+        "docs/RENDIMIENTO.md"
+      ],
+      "read_first": [
+        "SPEC.md",
+        "docs/svg-optimizacion.txt",
+        "tools/check_site.py"
+      ],
+      "check": "python3 tools/check_site.py",
+      "depends_on": [
+        "T-002",
+        "T-003"
+      ],
+      "tags": [
+        "docs",
+        "report"
+      ]
+    }
+  ]
+}
