@@ -124,3 +124,11 @@ Estas recomendaciones no se aplicaron porque cambian el diseño o requieren una 
 3. **hreflang absoluto con el dominio definitivo.** Las URLs de hreflang deben ser absolutas con el dominio final, que aún no está decidido.
 4. **Vídeos en móvil.** Cargar vídeos más ligeros o no cargarlos en móvil cambia lo que ve el usuario. Requiere decisión.
 5. **CSS que bloquea el renderizado.** Diferir o incrustar CSS cambia el orden de carga y puede provocar parpadeo de estilos.
+
+## Aviso: generador de la web
+
+El repositorio lo publica un generador (`.fuem-pages.json`: `fuem-pages-v1`, revisión 14; commits «Publish FUEM
+content revision N»). Si ese generador vuelve a publicar copiando sus propios `assets/` o regenerando los HTML,
+podría deshacer estos cambios (SVG recomprimidos y `height` del logo). Antes de la próxima publicación conviene
+llevar las imágenes optimizadas y el ajuste del logo a la fuente del generador, y ejecutar
+`python3 tools/check_site.py` después de publicar para detectar una regresión.
