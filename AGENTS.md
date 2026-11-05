@@ -1,6 +1,6 @@
 # test-pagina-web-fuem
 
-(objetivo pendiente: `aiforge spec`)
+Hacer que la web de Formula UEM cargue mucho más rápido (sobre todo en móvil) y corregir los avisos objetivos de Lighthouse, **sin cambiar su aspecto, sus textos ni sus URLs**.
 
 ## Comandos
 - (se definirán en la primera tarea; actualiza esta sección)
