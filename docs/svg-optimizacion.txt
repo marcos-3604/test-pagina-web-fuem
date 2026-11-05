@@ -1,0 +1,364 @@
+Informe de optimización de imágenes incrustadas en SVG (T-002)
+================================================================
+
+Este fichero contiene la salida literal de dos pasadas de tools/optimize_svg_images.py:
+
+  1. Primera pasada (PNG originales -> WebP) con el criterio inicial: error medio <= 2/255 y
+     error máximo <= 32/255 en todos los píxeles. La foto del coche (assets/v3) no cumplía el
+     máximo con pérdida (picos aislados de 87-91/255 en el 0,06 % de los valores, a cualquier
+     calidad, por el submuestreo de color YUV 4:2:0 de WebP) y se guardó sin pérdida; así
+     monoplaza.html seguía en 7,39 MB (> 6 MB).
+  2. Segunda pasada con el criterio decidido por el proyecto (decisión B): error medio
+     <= 2/255 y como mucho el 0,1 % de los valores de canal con error > 32/255, eligiendo la
+     calidad más baja que cumpla ambas. Se aplicó sobre los WebP sin pérdida de la primera
+     pasada, cuyos píxeles visibles son idénticos a los del PNG original, por lo que el error
+     se mide igualmente contra el original. Los WebP con pérdida de la primera pasada (q90, la
+     calidad más baja de la escalera) ya cumplían el criterio nuevo y no se tocan.
+
+Resultado final (original -> final) de los ficheros que cambiaron en la segunda pasada:
+  assets/v3/car-cutout.svg                         1851.4 KB -> 287.4 KB  (-84.5 %)
+  assets/v3/part-body.svg                          1852.0 KB -> 288.0 KB  (-84.4 %)
+  assets/v3/part-front-wheel.svg                   1851.7 KB -> 287.7 KB  (-84.5 %)
+  assets/v3/part-front-wing.svg                    1851.8 KB -> 287.8 KB  (-84.5 %)
+  assets/v3/part-rear-wheel.svg                    1851.7 KB -> 287.7 KB  (-84.5 %)
+  assets/v3/part-rear-wing.svg                     1851.7 KB -> 287.8 KB  (-84.5 %)
+  assets/partners/velinrent-velasco-movilidad.svg   251.0 KB ->  72.8 KB  (-71.0 %)
+  (el resto: tamaño final = "después" de la primera pasada)
+Total de los ficheros procesados: 13364.6 KB -> 2831.8 KB (-78.8 %).
+Con esto monoplaza.html / en/monoplaza.html pasan de 11.53 MB a 2.77 MB de imágenes y
+python3 tools/check_site.py termina en OK.
+
+C2PA: los PNG de la foto del coche (assets/v3) tenían metadatos C2PA (Content Credentials,
+chunk 'caBX'); el WebP no los conserva. El resto de metadatos del PNG también se pierde; el
+perfil de color ICC, si existía, se conserva.
+
+Solo cambia el data URI de cada SVG (el script comprueba antes de escribir que el resto del
+fichero es idéntico byte a byte) y los nombres de fichero no cambian.
+
+===============================================================================================
+PRIMERA PASADA
+
+Optimización de PNG incrustados en SVG (tools/optimize_svg_images.py)
+Criterio: WebP con pérdida (calidades 90/95/100, alfa sin pérdida) o WebP sin pérdida, el más pequeño
+que cumpla error medio <= 2/255 y máximo <= 32/255 por canal RGBA (color premultiplicado por alfa).
+Un fichero no se reescribe si ahorra menos del 20 %.
+AVISO: la re-codificación a WebP descarta los metadatos del PNG original, incluidos los metadatos C2PA (Content Credentials, chunk PNG 'caBX'). El perfil de color ICC, si existe, se conserva.
+
+assets/v3/car-cutout.svg
+    imagen 1: PNG 1388.3 KB -> WebP sin pérdida 919.2 KB (error medio 0.00/255, máx 0/255) [tenía C2PA]
+    1851.4 KB -> 1225.9 KB (-33.8 %): reescrito
+assets/v3/part-body.svg
+    imagen 1: PNG 1388.3 KB -> WebP sin pérdida 919.2 KB (error medio 0.00/255, máx 0/255) [tenía C2PA]
+    1852.0 KB -> 1226.5 KB (-33.8 %): reescrito
+assets/v3/part-front-wheel.svg
+    imagen 1: PNG 1388.3 KB -> WebP sin pérdida 919.2 KB (error medio 0.00/255, máx 0/255) [tenía C2PA]
+    1851.7 KB -> 1226.2 KB (-33.8 %): reescrito
+assets/v3/part-front-wing.svg
+    imagen 1: PNG 1388.3 KB -> WebP sin pérdida 919.2 KB (error medio 0.00/255, máx 0/255) [tenía C2PA]
+    1851.8 KB -> 1226.3 KB (-33.8 %): reescrito
+assets/v3/part-rear-wheel.svg
+    imagen 1: PNG 1388.3 KB -> WebP sin pérdida 919.2 KB (error medio 0.00/255, máx 0/255) [tenía C2PA]
+    1851.7 KB -> 1226.2 KB (-33.8 %): reescrito
+assets/v3/part-rear-wing.svg
+    imagen 1: PNG 1388.3 KB -> WebP sin pérdida 919.2 KB (error medio 0.00/255, máx 0/255) [tenía C2PA]
+    1851.7 KB -> 1226.2 KB (-33.8 %): reescrito
+assets/partners/3dconnexion.svg
+    imagen 1: PNG 24.1 KB -> WebP sin pérdida 7.3 KB (error medio 0.00/255, máx 0/255)
+    32.3 KB -> 9.8 KB (-69.6 %): reescrito
+assets/partners/afv-inicia.svg
+    imagen 1: PNG 8.7 KB -> WebP con pérdida q90 4.3 KB (error medio 0.26/255, máx 12/255)
+    11.7 KB -> 5.9 KB (-49.9 %): reescrito
+assets/partners/alucoat.svg
+    31.1 KB -> 31.1 KB (-0.0 %): sin PNG incrustado
+assets/partners/ansys.svg
+    imagen 1: PNG 34.5 KB -> WebP sin pérdida 16.7 KB (error medio 0.00/255, máx 0/255)
+    46.1 KB -> 22.4 KB (-51.5 %): reescrito
+assets/partners/avl.svg
+    imagen 1: PNG 234.1 KB -> WebP con pérdida q90 102.7 KB (error medio 0.14/255, máx 17/255)
+    312.3 KB -> 137.1 KB (-56.1 %): reescrito
+assets/partners/bosch.svg
+    imagen 1: PNG 5.4 KB -> WebP con pérdida q90 3.0 KB (error medio 0.00/255, máx 3/255)
+    7.3 KB -> 4.2 KB (-42.9 %): reescrito
+assets/partners/bossard.svg
+    imagen 1: PNG 12.3 KB -> WebP con pérdida q90 6.2 KB (error medio 0.13/255, máx 9/255)
+    16.5 KB -> 8.3 KB (-49.6 %): reescrito
+assets/partners/calspan.svg
+    imagen 1: PNG 110.6 KB -> WebP sin pérdida 25.5 KB (error medio 0.00/255, máx 0/255)
+    147.6 KB -> 34.1 KB (-76.9 %): reescrito
+assets/partners/cogiti-madrid.svg
+    imagen 1: PNG 14.0 KB -> WebP con pérdida q90 6.2 KB (error medio 0.91/255, máx 16/255)
+    18.8 KB -> 8.5 KB (-55.0 %): reescrito
+assets/partners/danima-composites.svg
+    imagen 1: PNG 211.1 KB -> WebP con pérdida q90 52.8 KB (error medio 0.71/255, máx 13/255)
+    281.6 KB -> 70.5 KB (-75.0 %): reescrito
+assets/partners/easy-composites.svg
+    imagen 1: PNG 57.9 KB -> WebP sin pérdida 11.5 KB (error medio 0.00/255, máx 0/255)
+    77.3 KB -> 15.4 KB (-80.1 %): reescrito
+assets/partners/elegoo.svg
+    11.1 KB -> 11.1 KB (-0.0 %): sin PNG incrustado
+assets/partners/esss.svg
+    imagen 1: PNG 80.9 KB -> WebP sin pérdida 38.5 KB (error medio 0.00/255, máx 0/255)
+    107.9 KB -> 51.4 KB (-52.4 %): reescrito
+assets/partners/fablab-ue.svg
+    imagen 1: PNG 8.0 KB -> WebP sin pérdida 4.3 KB (error medio 0.00/255, máx 0/255)
+    10.8 KB -> 5.9 KB (-44.9 %): reescrito
+assets/partners/hexagon.svg
+    imagen 1: PNG 51.9 KB -> WebP con pérdida q90 14.8 KB (error medio 0.08/255, máx 10/255)
+    69.3 KB -> 19.9 KB (-71.4 %): reescrito
+assets/partners/hgadvance.svg
+    imagen 1: PNG 26.5 KB -> WebP con pérdida q90 6.3 KB (error medio 0.49/255, máx 11/255)
+    35.5 KB -> 8.5 KB (-76.0 %): reescrito
+assets/partners/ibernova.svg
+    imagen 1: PNG 16.6 KB -> WebP sin pérdida 4.2 KB (error medio 0.00/255, máx 0/255)
+    22.2 KB -> 5.7 KB (-74.3 %): reescrito
+assets/partners/igus.svg
+    imagen 1: PNG 32.5 KB -> WebP sin pérdida 7.6 KB (error medio 0.00/255, máx 0/255)
+    43.4 KB -> 10.3 KB (-76.3 %): reescrito
+assets/partners/jpg-serveis.svg
+    imagen 1: PNG 15.4 KB -> WebP sin pérdida 3.1 KB (error medio 0.00/255, máx 0/255)
+    20.7 KB -> 4.3 KB (-79.4 %): reescrito
+assets/partners/mad-cup.svg
+    97.2 KB -> 97.2 KB (-0.0 %): sin PNG incrustado
+assets/partners/matlab.svg
+    imagen 1: PNG 9.2 KB -> WebP con pérdida q90 3.5 KB (error medio 0.15/255, máx 9/255)
+    12.4 KB -> 4.9 KB (-61.0 %): reescrito
+assets/partners/matva.svg
+    119.5 KB -> 119.5 KB (-0.0 %): sin PNG incrustado
+assets/partners/nord-lock.svg
+    imagen 1: PNG 17.4 KB -> WebP con pérdida q90 8.9 KB (error medio 0.55/255, máx 11/255)
+    23.4 KB -> 11.9 KB (-48.9 %): reescrito
+assets/partners/pma.svg
+    29.5 KB -> 29.5 KB (-0.0 %): sin PNG incrustado
+assets/partners/redia-engineering-motorsport.svg
+    imagen 1: PNG 5.1 KB -> WebP con pérdida q90 2.0 KB (error medio 0.29/255, máx 11/255)
+    7.0 KB -> 2.8 KB (-59.4 %): reescrito
+assets/partners/rgb-racing-team.svg
+    15.9 KB -> 15.9 KB (-0.0 %): sin PNG incrustado
+assets/partners/save-the-children.svg
+    imagen 1: PNG 53.0 KB -> WebP sin pérdida 14.1 KB (error medio 0.00/255, máx 0/255)
+    70.7 KB -> 18.9 KB (-73.3 %): reescrito
+assets/partners/solidworks.svg
+    imagen 1: PNG 44.5 KB -> WebP con pérdida q90 22.1 KB (error medio 0.16/255, máx 8/255)
+    59.5 KB -> 29.6 KB (-50.3 %): reescrito
+assets/partners/textreme.svg
+    imagen 1: PNG 3.9 KB -> WebP sin pérdida 2.4 KB (error medio 0.00/255, máx 0/255)
+    5.4 KB -> 3.4 KB (-37.5 %): reescrito
+assets/partners/tf3p.svg
+    12.2 KB -> 12.2 KB (-0.0 %): sin PNG incrustado
+assets/partners/universidad-europea.svg
+    imagen 1: PNG 33.9 KB -> WebP sin pérdida 15.6 KB (error medio 0.00/255, máx 0/255)
+    45.4 KB -> 20.9 KB (-54.0 %): reescrito
+assets/partners/velinrent-velasco-movilidad.svg
+    imagen 1: PNG 188.2 KB -> WebP sin pérdida 86.7 KB (error medio 0.00/255, máx 0/255)
+    251.0 KB -> 115.7 KB (-53.9 %): reescrito
+assets/partners/vila-rino-motorsport.svg
+    125.9 KB -> 125.9 KB (-0.0 %): sin PNG incrustado
+assets/partners/wurth-elektronik.svg
+    75.7 KB -> 75.7 KB (-0.0 %): sin PNG incrustado
+
+fichero                                                  antes       después   ahorro  decisión
+-----------------------------------------------------------------------------------------------
+assets/v3/car-cutout.svg                             1851.4 KB     1225.9 KB    33.8%  reescrito
+assets/v3/part-body.svg                              1852.0 KB     1226.5 KB    33.8%  reescrito
+assets/v3/part-front-wheel.svg                       1851.7 KB     1226.2 KB    33.8%  reescrito
+assets/v3/part-front-wing.svg                        1851.8 KB     1226.3 KB    33.8%  reescrito
+assets/v3/part-rear-wheel.svg                        1851.7 KB     1226.2 KB    33.8%  reescrito
+assets/v3/part-rear-wing.svg                         1851.7 KB     1226.2 KB    33.8%  reescrito
+assets/partners/3dconnexion.svg                        32.3 KB        9.8 KB    69.6%  reescrito
+assets/partners/afv-inicia.svg                         11.7 KB        5.9 KB    49.9%  reescrito
+assets/partners/alucoat.svg                            31.1 KB       31.1 KB     0.0%  sin PNG incrustado
+assets/partners/ansys.svg                              46.1 KB       22.4 KB    51.5%  reescrito
+assets/partners/avl.svg                               312.3 KB      137.1 KB    56.1%  reescrito
+assets/partners/bosch.svg                               7.3 KB        4.2 KB    42.9%  reescrito
+assets/partners/bossard.svg                            16.5 KB        8.3 KB    49.6%  reescrito
+assets/partners/calspan.svg                           147.6 KB       34.1 KB    76.9%  reescrito
+assets/partners/cogiti-madrid.svg                      18.8 KB        8.5 KB    55.0%  reescrito
+assets/partners/danima-composites.svg                 281.6 KB       70.5 KB    75.0%  reescrito
+assets/partners/easy-composites.svg                    77.3 KB       15.4 KB    80.1%  reescrito
+assets/partners/elegoo.svg                             11.1 KB       11.1 KB     0.0%  sin PNG incrustado
+assets/partners/esss.svg                              107.9 KB       51.4 KB    52.4%  reescrito
+assets/partners/fablab-ue.svg                          10.8 KB        5.9 KB    44.9%  reescrito
+assets/partners/hexagon.svg                            69.3 KB       19.9 KB    71.4%  reescrito
+assets/partners/hgadvance.svg                          35.5 KB        8.5 KB    76.0%  reescrito
+assets/partners/ibernova.svg                           22.2 KB        5.7 KB    74.3%  reescrito
+assets/partners/igus.svg                               43.4 KB       10.3 KB    76.3%  reescrito
+assets/partners/jpg-serveis.svg                        20.7 KB        4.3 KB    79.4%  reescrito
+assets/partners/mad-cup.svg                            97.2 KB       97.2 KB     0.0%  sin PNG incrustado
+assets/partners/matlab.svg                             12.4 KB        4.9 KB    61.0%  reescrito
+assets/partners/matva.svg                             119.5 KB      119.5 KB     0.0%  sin PNG incrustado
+assets/partners/nord-lock.svg                          23.4 KB       11.9 KB    48.9%  reescrito
+assets/partners/pma.svg                                29.5 KB       29.5 KB     0.0%  sin PNG incrustado
+assets/partners/redia-engineering-motorsport.svg        7.0 KB        2.8 KB    59.4%  reescrito
+assets/partners/rgb-racing-team.svg                    15.9 KB       15.9 KB     0.0%  sin PNG incrustado
+assets/partners/save-the-children.svg                  70.7 KB       18.9 KB    73.3%  reescrito
+assets/partners/solidworks.svg                         59.5 KB       29.6 KB    50.3%  reescrito
+assets/partners/textreme.svg                            5.4 KB        3.4 KB    37.5%  reescrito
+assets/partners/tf3p.svg                               12.2 KB       12.2 KB     0.0%  sin PNG incrustado
+assets/partners/universidad-europea.svg                45.4 KB       20.9 KB    54.0%  reescrito
+assets/partners/velinrent-velasco-movilidad.svg       251.0 KB      115.7 KB    53.9%  reescrito
+assets/partners/vila-rino-motorsport.svg              125.9 KB      125.9 KB     0.0%  sin PNG incrustado
+assets/partners/wurth-elektronik.svg                   75.7 KB       75.7 KB     0.0%  sin PNG incrustado
+-----------------------------------------------------------------------------------------------
+TOTAL                                               13364.6 KB     8505.5 KB    36.4%
+
+Nota: algunos PNG originales tenían metadatos C2PA ([tenía C2PA]); el WebP ya no los incluye.
+
+===============================================================================================
+SEGUNDA PASADA (criterio de la decisión B)
+
+Optimización de PNG incrustados en SVG (tools/optimize_svg_images.py)
+Criterio: WebP con pérdida (calidades 90/95/100, alfa sin pérdida; se queda la más baja que cumple)
+o WebP sin pérdida, el más pequeño que cumpla, comparando con el PNG en RGBA (color premultiplicado
+por alfa): error medio por canal <= 2/255 y como mucho el 0.1 % de los valores de canal con error > 32/255.
+Decisión del proyecto: se admiten picos aislados > 32/255 (hasta el 0.1 %) porque el WebP con pérdida
+(YUV 4:2:0) los produce en bordes de color saturado a cualquier calidad; el error máximo de cada
+imagen se indica abajo.
+Fuentes: PNG incrustados y WebP sin pérdida incrustados (sus píxeles visibles son los del PNG
+original); los WebP con pérdida no se tocan.
+Un fichero no se reescribe si ahorra menos del 20 %.
+AVISO: la re-codificación a WebP descarta los metadatos del PNG original, incluidos los metadatos C2PA (Content Credentials, chunk PNG 'caBX'). El perfil de color ICC, si existe, se conserva.
+
+assets/v3/car-cutout.svg
+    imagen 1: WebP sin pérdida 919.2 KB -> WebP con pérdida q90 215.3 KB (error medio 0.77/255, máx 90/255, 0.0606 % de valores > 32/255)
+    1225.9 KB -> 287.4 KB (-76.6 %): reescrito
+assets/v3/part-body.svg
+    imagen 1: WebP sin pérdida 919.2 KB -> WebP con pérdida q90 215.3 KB (error medio 0.77/255, máx 90/255, 0.0606 % de valores > 32/255)
+    1226.5 KB -> 288.0 KB (-76.5 %): reescrito
+assets/v3/part-front-wheel.svg
+    imagen 1: WebP sin pérdida 919.2 KB -> WebP con pérdida q90 215.3 KB (error medio 0.77/255, máx 90/255, 0.0606 % de valores > 32/255)
+    1226.2 KB -> 287.7 KB (-76.5 %): reescrito
+assets/v3/part-front-wing.svg
+    imagen 1: WebP sin pérdida 919.2 KB -> WebP con pérdida q90 215.3 KB (error medio 0.77/255, máx 90/255, 0.0606 % de valores > 32/255)
+    1226.3 KB -> 287.8 KB (-76.5 %): reescrito
+assets/v3/part-rear-wheel.svg
+    imagen 1: WebP sin pérdida 919.2 KB -> WebP con pérdida q90 215.3 KB (error medio 0.77/255, máx 90/255, 0.0606 % de valores > 32/255)
+    1226.2 KB -> 287.7 KB (-76.5 %): reescrito
+assets/v3/part-rear-wing.svg
+    imagen 1: WebP sin pérdida 919.2 KB -> WebP con pérdida q90 215.3 KB (error medio 0.77/255, máx 90/255, 0.0606 % de valores > 32/255)
+    1226.2 KB -> 287.8 KB (-76.5 %): reescrito
+assets/partners/3dconnexion.svg
+    imagen 1: WebP sin pérdida 7.3 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    9.8 KB -> 9.8 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/afv-inicia.svg
+    5.9 KB -> 5.9 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/alucoat.svg
+    31.1 KB -> 31.1 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/ansys.svg
+    imagen 1: WebP sin pérdida 16.7 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    22.4 KB -> 22.4 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/avl.svg
+    137.1 KB -> 137.1 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/bosch.svg
+    4.2 KB -> 4.2 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/bossard.svg
+    8.3 KB -> 8.3 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/calspan.svg
+    imagen 1: WebP sin pérdida 25.5 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    34.1 KB -> 34.1 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/cogiti-madrid.svg
+    8.5 KB -> 8.5 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/danima-composites.svg
+    70.5 KB -> 70.5 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/easy-composites.svg
+    imagen 1: WebP sin pérdida 11.5 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    15.4 KB -> 15.4 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/elegoo.svg
+    11.1 KB -> 11.1 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/esss.svg
+    imagen 1: WebP sin pérdida 38.5 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    51.4 KB -> 51.4 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/fablab-ue.svg
+    imagen 1: WebP sin pérdida 4.3 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    5.9 KB -> 5.9 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/hexagon.svg
+    19.9 KB -> 19.9 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/hgadvance.svg
+    8.5 KB -> 8.5 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/ibernova.svg
+    imagen 1: WebP sin pérdida 4.2 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    5.7 KB -> 5.7 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/igus.svg
+    imagen 1: WebP sin pérdida 7.6 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    10.3 KB -> 10.3 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/jpg-serveis.svg
+    imagen 1: WebP sin pérdida 3.1 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    4.3 KB -> 4.3 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/mad-cup.svg
+    97.2 KB -> 97.2 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/matlab.svg
+    4.9 KB -> 4.9 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/matva.svg
+    119.5 KB -> 119.5 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/nord-lock.svg
+    11.9 KB -> 11.9 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/pma.svg
+    29.5 KB -> 29.5 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/redia-engineering-motorsport.svg
+    2.8 KB -> 2.8 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/rgb-racing-team.svg
+    15.9 KB -> 15.9 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/save-the-children.svg
+    imagen 1: WebP sin pérdida 14.1 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    18.9 KB -> 18.9 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/solidworks.svg
+    29.6 KB -> 29.6 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/textreme.svg
+    imagen 1: WebP sin pérdida 2.4 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    3.4 KB -> 3.4 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/tf3p.svg
+    12.2 KB -> 12.2 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/universidad-europea.svg
+    imagen 1: WebP sin pérdida 15.6 KB -> WebP sin pérdida no es más pequeño que la imagen actual: se deja igual
+    20.9 KB -> 20.9 KB (-0.0 %): sin cambios (ninguna imagen mejora)
+assets/partners/velinrent-velasco-movilidad.svg
+    imagen 1: WebP sin pérdida 86.7 KB -> WebP con pérdida q90 54.5 KB (error medio 0.25/255, máx 52/255, 0.0050 % de valores > 32/255)
+    115.7 KB -> 72.8 KB (-37.1 %): reescrito
+assets/partners/vila-rino-motorsport.svg
+    125.9 KB -> 125.9 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+assets/partners/wurth-elektronik.svg
+    75.7 KB -> 75.7 KB (-0.0 %): sin PNG ni WebP sin pérdida incrustado
+
+fichero                                                  antes       después   ahorro  decisión
+-----------------------------------------------------------------------------------------------
+assets/v3/car-cutout.svg                             1225.9 KB      287.4 KB    76.6%  reescrito
+assets/v3/part-body.svg                              1226.5 KB      288.0 KB    76.5%  reescrito
+assets/v3/part-front-wheel.svg                       1226.2 KB      287.7 KB    76.5%  reescrito
+assets/v3/part-front-wing.svg                        1226.3 KB      287.8 KB    76.5%  reescrito
+assets/v3/part-rear-wheel.svg                        1226.2 KB      287.7 KB    76.5%  reescrito
+assets/v3/part-rear-wing.svg                         1226.2 KB      287.8 KB    76.5%  reescrito
+assets/partners/3dconnexion.svg                         9.8 KB        9.8 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/afv-inicia.svg                          5.9 KB        5.9 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/alucoat.svg                            31.1 KB       31.1 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/ansys.svg                              22.4 KB       22.4 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/avl.svg                               137.1 KB      137.1 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/bosch.svg                               4.2 KB        4.2 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/bossard.svg                             8.3 KB        8.3 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/calspan.svg                            34.1 KB       34.1 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/cogiti-madrid.svg                       8.5 KB        8.5 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/danima-composites.svg                  70.5 KB       70.5 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/easy-composites.svg                    15.4 KB       15.4 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/elegoo.svg                             11.1 KB       11.1 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/esss.svg                               51.4 KB       51.4 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/fablab-ue.svg                           5.9 KB        5.9 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/hexagon.svg                            19.9 KB       19.9 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/hgadvance.svg                           8.5 KB        8.5 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/ibernova.svg                            5.7 KB        5.7 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/igus.svg                               10.3 KB       10.3 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/jpg-serveis.svg                         4.3 KB        4.3 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/mad-cup.svg                            97.2 KB       97.2 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/matlab.svg                              4.9 KB        4.9 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/matva.svg                             119.5 KB      119.5 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/nord-lock.svg                          11.9 KB       11.9 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/pma.svg                                29.5 KB       29.5 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/redia-engineering-motorsport.svg        2.8 KB        2.8 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/rgb-racing-team.svg                    15.9 KB       15.9 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/save-the-children.svg                  18.9 KB       18.9 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/solidworks.svg                         29.6 KB       29.6 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/textreme.svg                            3.4 KB        3.4 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/tf3p.svg                               12.2 KB       12.2 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/universidad-europea.svg                20.9 KB       20.9 KB     0.0%  sin cambios (ninguna imagen mejora)
+assets/partners/velinrent-velasco-movilidad.svg       115.7 KB       72.8 KB    37.1%  reescrito
+assets/partners/vila-rino-motorsport.svg              125.9 KB      125.9 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+assets/partners/wurth-elektronik.svg                   75.7 KB       75.7 KB     0.0%  sin PNG ni WebP sin pérdida incrustado
+-----------------------------------------------------------------------------------------------
+TOTAL                                                8505.5 KB     2831.8 KB    66.7%
