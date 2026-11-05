@@ -124,6 +124,7 @@ Estas recomendaciones no se aplicaron porque cambian el diseño o requieren una 
 3. **hreflang absoluto con el dominio definitivo.** Las URLs de hreflang deben ser absolutas con el dominio final, que aún no está decidido.
 4. **Vídeos en móvil.** Cargar vídeos más ligeros o no cargarlos en móvil cambia lo que ve el usuario. Requiere decisión.
 5. **CSS que bloquea el renderizado.** Diferir o incrustar CSS cambia el orden de carga y puede provocar parpadeo de estilos.
+6. **Animación de entrada (lo que más pesa ahora en móvil).** Tras la optimización, en la portada la imagen principal ya está descargada a los ~1,8 s, pero se pinta a los 11 s: Lighthouse atribuye 9,1 s a «Render Delay» (en `monoplaza.html`, 11,2 s), que corresponde a la animación de entrada (`#intro`, contador «000»). Acortarla, permitir saltarla o mostrarla solo en la primera visita bajaría el LCP móvil de ~11 s a ~2 s. Es una decisión de diseño, así que no se ha tocado.
 
 ## Aviso: generador de la web
 
