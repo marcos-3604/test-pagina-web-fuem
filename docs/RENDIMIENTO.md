@@ -14,7 +14,22 @@ Lighthouse 12, móvil (SPEC.md):
 | Portada (`index.html`) | 22,7 s | 7,4 MB |
 | `monoplaza.html` | 50,8 s | 12,2 MB |
 
-No se ha hecho ninguna medición Lighthouse nueva en esta fase. La medición posterior la hará aiforge.
+### Medición después (Lighthouse 12, 2026-11-05, servidor local, mismas páginas)
+
+| Página | Modo | LCP antes → después | Peso transferido antes → después | Rendimiento antes → después |
+|---|---|---|---|---|
+| `index.html` | móvil | 22,7 s → 11,0 s | 7.457 KiB → 4.744 KiB | 74 → 74 |
+| `index.html` | escritorio | 3,9 s → 1,9 s | 11.383 KiB → 8.670 KiB | 79 → 91 |
+| `monoplaza.html` | móvil | 50,8 s → 11,6 s | 12.180 KiB → 3.211 KiB | 64 → 64 |
+| `monoplaza.html` | escritorio | 8,4 s → 2,0 s | 12.180 KiB → 3.211 KiB | 71 → 87 |
+| `galeria.html` | móvil | 4,4 s → 4,3 s | 3.373 KiB → 2.224 KiB | 78 → 79 |
+
+En móvil la nota global no sube porque la limitan el CSS que bloquea el renderizado (10 hojas de estilo) y la
+animación de entrada; ver «Recomendaciones no aplicadas». Accesibilidad, buenas prácticas y SEO no cambian.
+
+**Aspecto**: capturas completas antes/después (Playwright, 1440 px y 390 px, tras cargar toda la página):
+0,03 % de píxeles distintos en escritorio (recompresión de los logos, invisible); en móvil solo cambia el pie por
+el logo corregido a su proporción real (2 px más alto).
 
 ## Cambios realizados
 
